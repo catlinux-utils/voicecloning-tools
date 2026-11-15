@@ -1,4 +1,4 @@
-# Reproducible installer for OmniVoice-on-Vulkan.
+# Reproducible installer for OmniVoice-on-Vulkan (Windows).
 # Downloads the pinned, checksummed artifacts from versions.json and installs them.
 #
 # Usage (from the repository root):
@@ -8,7 +8,8 @@
 #   powershell -ExecutionPolicy Bypass -File setup.ps1 -Force          # re-download even if cached
 #   powershell -ExecutionPolicy Bypass -File setup.ps1 -ModelPrecision f16
 #
-# Works on Windows PowerShell 5.1 and PowerShell 7+. Needs ~4 GB free disk.
+# Windows PowerShell 5.1+. Linux: use setup.sh or the Nix flake instead.
+# Needs ~4 GB free disk.
 
 #Requires -Version 5.1
 [CmdletBinding()]
@@ -68,13 +69,14 @@ Write-Host "=== OmniVoice on Vulkan - setup ==="
 Write-Host ("audio.cpp {0} | model precision {1}" -f $versions.audio_cpp.version, $ModelPrecision)
 
 # --- 1. Runtime (audio.cpp portable Vulkan build) ---
-$runtime = Get-CachedArtifact $versions.audio_cpp.runtime_asset 'audio.cpp runtime'
+$asset = $versions.audio_cpp.assets.'windows-x64'
+$runtime = Get-CachedArtifact $asset 'audio.cpp runtime'
 $stampPath = Join-Path $root 'bin\.setup-stamp.json'
 $stampOk = $false
 if (-not $Force -and (Test-Path $stampPath)) {
     try {
         $stamp = Get-Content -Path $stampPath -Raw | ConvertFrom-Json
-        $stampOk = ($stamp.runtime_sha256 -eq $versions.audio_cpp.runtime_asset.sha256)
+        $stampOk = ($stamp.runtime_sha256 -eq $asset.sha256)
     } catch { $stampOk = $false }
 }
 if ($stampOk) {
@@ -88,7 +90,7 @@ if ($stampOk) {
     Copy-Item -Path (Join-Path $tmp '*') -Destination (Join-Path $root 'bin') -Recurse -Force
     Remove-Item -Recurse -Force $tmp
     @{
-        runtime_sha256 = $versions.audio_cpp.runtime_asset.sha256
+        runtime_sha256 = $asset.sha256
         installed_at   = (Get-Date).ToUniversalTime().ToString('o')
     } | ConvertTo-Json | Set-Content -Path $stampPath -Encoding UTF8
     Write-Host "[ok] runtime installed"

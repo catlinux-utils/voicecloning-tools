@@ -5,12 +5,15 @@ running on **[audio.cpp](https://github.com/0xShug0/audio.cpp)** — a pure C++/
 the **Vulkan backend only**.
 
 No CUDA, no ROCm/HIP, no PyTorch, no external drivers or SDKs. Everything uses the Vulkan runtime that
-ships inside your normal GPU driver. Verified on **AMD Radeon RX 6600** (~1.5× faster than real-time);
-works on any Vulkan-capable GPU (NVIDIA, Intel Arc, AMD).
+ships inside your normal GPU driver (AMD: the standard mesa RADV driver is enough on Linux). Verified on
+**AMD Radeon RX 6600** (~1.5× faster than real-time); works on any Vulkan-capable GPU (NVIDIA, Intel Arc, AMD).
 
 ## Reproducible install
 
-Requirements: Windows 10+ x64, PowerShell 5.1+, ~4 GB free disk, a GPU with up-to-date Vulkan drivers.
+Requirements: Windows 10+ x64 with PowerShell 5.1+, **or** Linux x64 with bash/curl/tar/python3,
+~4 GB free disk, and a GPU with up-to-date Vulkan drivers.
+
+### Windows
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File setup.ps1
@@ -29,21 +32,53 @@ powershell -ExecutionPolicy Bypass -File setup.ps1 -ModelPrecision f16 # bf16/f1
 powershell -ExecutionPolicy Bypass -File setup.ps1 -Force              # re-download everything
 ```
 
+### Linux
+
+```bash
+./setup.sh                        # full install
+./setup.sh --smoke-test           # + device check and sample generation
+./setup.sh --skip-model           # runtime only
+./setup.sh --precision f16        # q8_0 (default) | bf16 | f16
+./setup.sh --force                # re-download everything
+```
+
+If device listing shows no GPU, install the Vulkan loader + driver:
+`sudo apt install libvulkan1 mesa-vulkan-drivers` (Debian/Ubuntu),
+`sudo dnf install vulkan-loader mesa-vulkan-drivers` (Fedora),
+`vulkan-radeon` / `nvidia-utils` / `intel-media-driver` (Arch).
+Linux launcher scripts: `./tts.sh`, `./clone.sh`, `./design.sh`, `./server.sh`.
+
+### Nix
+
+```bash
+nix run . -- --text "Hello" --out out.wav   # TTS (q8_0, Vulkan backend)
+nix run .#omnivoice-server                  # WebUI at http://127.0.0.1:8080
+nix build .#omnivoice-f16                   # other precisions
+```
+
+After publishing to GitHub this also works from anywhere:
+`nix run github:<you>/omnivoice-vulkan -- --text "..."`. The flake consumes the same
+`versions.json` pins (runtime tarball + GGUF via `fetchurl` with SRI hashes), wraps the
+binaries with `autoPatchelfHook` + `vulkan-loader`, and exposes `omnivoice`, `audiocpp-cli`,
+and `omnivoice-server` commands. x86_64-linux only (the only prebuilt Linux target).
+
 All versions, URLs, sizes, and checksums live in one file: [`versions.json`](versions.json). To upgrade,
-bump the values there and re-run `setup.ps1`; a checksum mismatch fails loudly instead of silently
+bump the values there and re-run the setup script; a checksum mismatch fails loudly instead of silently
 installing something different.
 
 ### What gets pinned
 
 | Artifact | Version | Source |
 |---|---|---|
-| audio.cpp runtime (Windows x64, Vulkan portable) | 0.9.5 | GitHub release `0xShug0/audio.cpp@v0.9.5` |
+| audio.cpp runtime (Windows x64 + Linux x64, Vulkan portable) | 0.9.5 | GitHub release `0xShug0/audio.cpp@v0.9.5` |
 | OmniVoice GGUF `q8_0` (default), `bf16`/`f16` optional | @ HF revision `ca0b203e` | `audio-cpp/audio.cpp-gguf` on Hugging Face |
 
 > **Offline install**: copy `bin\` + `models\OmniVoice-GGUF\` from any machine where `setup.ps1` already
 > ran — the checksums in `versions.json` are what makes such copies trustworthy.
 
 ## Usage
+
+Windows (`.bat`) and Linux (`.sh`) launchers behave identically:
 
 ```bat
 :: plain text-to-speech (auto voice)
@@ -57,6 +92,11 @@ design.bat "A brand new voice." "female, young adult, low pitch, british accent"
 
 :: web UI + OpenAI-compatible API
 server.bat        :: WebUI at http://127.0.0.1:8080
+```
+
+```bash
+# same on Linux:
+./tts.sh "Hello world." ; ./clone.sh "Text" ref.wav out.wav "transcript" ; ./server.sh
 ```
 
 Sample outputs from the original install are not committed; generate your own with the commands above or
@@ -116,13 +156,14 @@ design via API: `"options": {"instruct": "female, ..."}`.
 ## Repository layout
 
 ```
-setup.ps1              reproducible installer (checksum-verified, idempotent)
-versions.json          pinned versions, URLs, SHA-256 checksums — single source of truth
-tts.bat / clone.bat    one-line launchers (call bin\audiocpp_cli.exe --backend vulkan)
-design.bat / server.bat
+setup.ps1              reproducible installer, Windows (checksum-verified, idempotent)
+setup.sh               reproducible installer, Linux x64 (same pins, same logic)
+flake.nix              Nix package: runtime + model + omnivoice/omnivoice-server wrappers
+versions.json          pinned versions, URLs, SHA-256 + SRI checksums — single source of truth
+tts/clone/design/server .bat + .sh   one-line launchers (backend vulkan)
 server.json            server config (Vulkan, offline TTS, WebUI enabled)
-bin/                   audio.cpp runtime          (installed by setup.ps1, gitignored)
-models/                OmniVoice GGUF            (installed by setup.ps1, gitignored)
+bin/                   audio.cpp runtime          (installed by setup script, gitignored)
+models/                OmniVoice GGUF            (installed by setup script, gitignored)
 output/                generated WAV files       (gitignored)
 ```
 
