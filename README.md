@@ -84,7 +84,7 @@ nix build .#omnivoice-f16                   # other precisions
 ```
 
 Once the repo is on GitHub this also works from anywhere:
-`nix run github:<you>/omnivoice-vulkan -- --text "..."`. The flake consumes the same
+`nix run github:catlinux-utils/voicecloning-tools -- --text "..."`. The flake consumes the same
 [`versions.json`](versions.json) pins via `fetchurl` SRI hashes, patches the prebuilt binaries for the Nix
 store (`autoPatchelfHook` + `vulkan-loader`), and exposes `omnivoice`, `audiocpp-cli`, and
 `omnivoice-server`. x86_64-linux only — the only prebuilt audio.cpp Linux target.
