@@ -1,0 +1,9 @@
+# Downloaded/installed artifacts (recreated by setup.ps1)
+/bin/
+/models/
+/output/
+/.cache/
+
+# Local junk
+*.log
+*.tmp

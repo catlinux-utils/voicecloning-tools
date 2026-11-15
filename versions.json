@@ -1,0 +1,38 @@
+{
+  "$comment": "Single source of truth for pinned, checksummed artifacts. setup.ps1 reads this file. sha256 values are lowercase hex.",
+  "audio_cpp": {
+    "version": "0.9.5",
+    "repo": "0xShug0/audio.cpp",
+    "runtime_asset": {
+      "filename": "audio-v0.9.5-bin-windows-x64-vulkan-portable.zip",
+      "url": "https://github.com/0xShug0/audio.cpp/releases/download/v0.9.5/audio-v0.9.5-bin-windows-x64-vulkan-portable.zip",
+      "size_bytes": 85462928,
+      "sha256": "6c304c9a1e0cfc18b2d3b208b03d40365fec71d094ee4da4f695b2d9e7de29e8"
+    }
+  },
+  "omnivoice_gguf": {
+    "repo": "audio-cpp/audio.cpp-gguf",
+    "revision": "ca0b203eb1bb87f333a7cfbad2d5f6672b4ccba7",
+    "dir": "OmniVoice-GGUF",
+    "precision": {
+      "q8_0": {
+        "filename": "omnivoice-q8_0.gguf",
+        "url": "https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/ca0b203eb1bb87f333a7cfbad2d5f6672b4ccba7/OmniVoice-GGUF/omnivoice-q8_0.gguf",
+        "size_bytes": 1350296096,
+        "sha256": "0e5a721edd1b08d9067ef66f40ded609a6b14f5a8445c703f9869736cabd350a"
+      },
+      "bf16": {
+        "filename": "omnivoice-bf16.gguf",
+        "url": "https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/ca0b203eb1bb87f333a7cfbad2d5f6672b4ccba7/OmniVoice-GGUF/omnivoice-bf16.gguf",
+        "size_bytes": 1639556288,
+        "sha256": "a5e0b148274f1bd719dd9e30b2d400671e587b0457a9c7e8840cfe7be94c5b62"
+      },
+      "f16": {
+        "filename": "omnivoice-f16.gguf",
+        "url": "https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/ca0b203eb1bb87f333a7cfbad2d5f6672b4ccba7/OmniVoice-GGUF/omnivoice-f16.gguf",
+        "size_bytes": 1639556448,
+        "sha256": "cec92925cddef7d8ef33a462155b268a662a15a9ebd40cb5a284ccc1179d6a08"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "_comment": "OmniVoice on Vulkan. Start with: bin\\audiocpp_server.exe --config server.json",
+  "host": "127.0.0.1",
+  "port": 8080,
+  "backend": "vulkan",
+  "device": 0,
+  "threads": 4,
+  "lazy_load": true,
+  "max_loaded_models": 1,
+  "ui": true,
+  "ui_management": false,
+  "models": [
+    {
+      "id": "omnivoice",
+      "family": "omnivoice",
+      "path": "models/OmniVoice-GGUF",
+      "task": "tts",
+      "mode": "offline",
+      "default_request_options": {
+        "num_inference_steps": 32,
+        "guidance_scale": 2.0,
+        "speed": 1.0
+      }
+    }
+  ]
+}
